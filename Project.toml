@@ -1,0 +1,4 @@
+name = "NumericalMethod"
+uuid = "44b93d42-7cf8-43f6-9e0d-463c67a79537"
+authors = ["Hailong Guo <hailongguo6@gmail.com>"]
+version = "0.1.0"

@@ -1,12 +1,12 @@
-function val = ctr(f::Function, a=0, b=1, N = 10)
-    h = (b-a)/N
+function ctr(f::Function, box=[0;1], N = 10)
+    h = (box[2]-box[1])/N
     val = 0
-    val += f(a)/2
+    val += f(box[1])/2
     for j = 1:N-1
-        x = a + j*h
+        x = box[1] + j*h
         val += f(x)
     end
-    val += f(b)/2
+    val += f(box[2])/2
     val *= h
     return val
 end

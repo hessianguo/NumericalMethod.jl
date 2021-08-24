@@ -1,3 +1,6 @@
+include("linearsystem.jl")
+using BenchmarkTools
+
 function tbt(δ)
     u22 = 1.0 - 1.0/δ
     b2 = 2.0 - (1.0 + δ)/δ
@@ -28,3 +31,20 @@ e1,e2 = tbt(δ)
 println((e1,e2))
 e1,e2 = tbtp(δ)
 println((e1,e2))
+
+# Test LU factorization
+#A = [1.0 2 3; 4 5 6; 7 8 9]
+#A = rand(1000,1000)
+#B = deepcopy(A)
+#@time L, U, p = lu!(A)
+#L*U - B[p, :]
+
+# Test Cholesky factorization
+A = rand(2000,2000)
+C = A'*A
+D = deepcopy(C)
+@time L = chol(C)
+@time L = chol2!(D)
+#@benchmark L = chol3!(D)
+
+#@benchmark L2 = cholesky(C)

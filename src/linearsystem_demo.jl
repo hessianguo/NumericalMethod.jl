@@ -49,10 +49,20 @@ D = deepcopy(C)
 #@benchmark L2 = cholesky(C)
 
 # test gaussian elimination with partial pivot
-n = 1000
+n = 10
 A = rand(n,n)
 x = rand(n)
 b = A*x
 @time xt = gepp!(A,b)
 err = norm(xt-x)
-print(err)
+println(err)
+
+A = [2.0 -1.0 0; -1.0 2.0 -1.0; 0 -1.0 2.0]
+x = rand(3)
+b = A*x
+x0 = rand(3)
+@time x1, it = gaussseidel(A, b, x0)
+err = norm(x1-x)
+println(err)
+println(x1)
+println(it)

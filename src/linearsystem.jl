@@ -110,3 +110,75 @@ function gepp!(A::AbstractMatrix, b::AbstractVector)
     end
     return x
 end
+
+"""
+    jacobi(A, b, x0)
+    jacobi(A, b, x0, tol)
+
+Solve the linear system using Jacobi method.
+
+# Example
+```julia-repl
+julia> A = rand(3,3)
+julia> b = rand(3)
+julia> x0 = rand(3)
+julia> x = jacobi(A, b, x0)
+```
+"""
+function jacobi(A::AbstractMatrix, b::AbstractVector, x::AbstractVector, tol::Float64=1e-10)
+    xc = similar(b)
+    n, = size(b)
+    err = 1.0
+    it = 0
+    while err > tol
+        @inbounds for i in 1:n
+            xc[i] = b[i]
+            @inbounds for k in 1:n
+                if k != i
+                    xc[i] -= A[i,k]*x[k]
+                end
+            end
+            xc[i] /= A[i,i]
+        end
+        err = norm(x-xc)
+        x = copy(xc)
+        it += 1
+    end
+    return xc, it
+end
+
+"""
+    gaussseidel(A, b, x0)
+    gaussseidel(A, b, x0, tol)
+
+Solve the linear system using Gauss-Seidel method.
+
+# Example
+```julia-repl
+julia> A = rand(3,3)
+julia> b = rand(3)
+julia> x0 = rand(3)
+julia> x = gaussseidel(A, b, x0)
+```
+"""
+function gaussseidel(A::AbstractMatrix, b::AbstractVector, x::AbstractVector, tol::Float64=1e-10)
+    n, = size(b)
+    err = 1.0
+    it = 0
+    xc = copy(x)
+    while err > tol
+        @inbounds for i in 1:n
+            xc[i] = b[i]
+            @inbounds for k in 1:n
+                if k != i
+                    xc[i] -= A[i,k]*xc[k]
+                end
+            end
+            xc[i] /= A[i,i]
+        end
+        err = norm(x-xc)
+        x = copy(xc)
+        it += 1
+    end
+    return xc, it
+end

@@ -1,9 +1,18 @@
 using LinearAlgebra
-function lu!(A)
+"""
+    lu!(A)
+Compute LU factorization of the matrix `A`.
+
+# Example
+```julia-repl
+julia> lu!([1 2; 3 4])
+```
+"""
+function lu!(A::AbstractMatrix)
     n,n = size(A)
     p = collect(1:n)
     for k in 1:n-1
-        r,m = findmax(abs.(A[k:n,k]))
+        m = argmax(abs.(A[k:n,k]))
         m = m + k - 1
         if A[m,k] != 0
             if m != k
@@ -25,9 +34,21 @@ function lu!(A)
     return L, U, p
 end
 
-function chol(A)
+"""
+    chol!(A)
+Compute cholesky factorization of the spd matrix `A`.
+
+# Argument
+- `A:AbstractMatrix`: symmetric positive definite matrix
+
+# Example
+```julia-repl
+julia> chol([1 2; 2 5])
+```
+"""
+function chol(A::AbstractMatrix)
     n,n = size(A)
-    L = zeros(n,n)
+    L = similar(A)
     @inbounds begin
          for i in 1:n
              tmp = 0
@@ -46,57 +67,46 @@ function chol(A)
     return L
 end
 
-function chol2!(A)
-    n,n = size(A)
-    for i in 1:n
-        A[i,i] = sqrt(A[i,i] - sum(A[i,1:i-1].^2))
-        for j in i+1:n
-            A[j,i] = (A[i,j] - sum(A[i,1:i-1].*A[j,1:i-1])) / A[i,i]
-        end
-    end
-    return tril(A)
-end
+"""
+    gepp!(A,b)
+Solve the linear system ``Ax=b`` using Gaussian elimination with partial pivot
 
-function chol3!(A)
+# Example
+```julia-repl
+julia> A = rand(3,3)
+julia> b = rand(3)
+julia> x = gepp!(A, b)
+```
+"""
+function gepp!(A::AbstractMatrix, b::AbstractVector)
     n,n = size(A)
-    for i in 1:n
-        tmp = 0
-        for k in 1:i-1
-            tmp += A[i,k].^2
-        end
-        A[i,i] = sqrt(A[i,i] - tmp)
-        for j in i+1:n
-            A[j,i] = A[i,j] / A[i,i]
-            for k in 1:i-1
-                A[j,i] -=  A[i,k].*A[j,k] / A[i,i]
-            end
-        end
-    end
-    return tril(A)
-end
-
-function ge!(A, b)
-    n,n = size(A)
-    p = collect(1:n)
     for k in 1:n-1
-        r,m = findmax(abs.(A[k:n,k]))
+        # pivot
+        m = argmax(abs.(A[k:n,k]))
         m = m + k - 1
         if A[m,k] != 0
             if m != k
-                p[k], p[m] = p[m], p[k]
+                b[k], b[m] = b[m], b[k]
                 for j in 1:n
                     A[k,j], A[m,j] = A[m,j], A[k,j]
                 end
             end
             for i in k+1:n
                 A[i,k] /= A[k,k]
+                b[i] -= A[i,k]*b[k]
                 for j in k+1:n
                     A[i,j] -= A[i,k]*A[k,j]
                 end
             end
         end
     end
-    L = tril(A,-1) + Matrix{Float64}(I, n, n)
-    U = triu(A)
-    return L, U, p
+    # back substituion
+    x = zeros(n)
+    for k in n:-1:1
+        for j = n:-1:k+1
+            b[k] -= A[k,j]*x[j]
+        end
+        x[k] = b[k] / A[k,k]
+    end
+    return x
 end

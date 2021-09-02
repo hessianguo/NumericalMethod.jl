@@ -1,5 +1,23 @@
 using Plots
-function newton(f::Function, df::Function, x0=1, tol=1e-7)
+"""
+    newton(f, df)
+    newton(f, df, x0)
+    newton(f, df, x0, tol)
+
+Find roots of the noninear function `f` using Netwon's method.
+
+# Argument
+- `f::Function`: the nonlinear function.
+- `df::function`: the derivative of the nonlinear function.
+- `x0::Float64`: initial guess.
+- 'tol::Float64': error tolerance.
+
+# Example
+```julia-repl
+julia> newton(x->cos(x)-x, x->-sin(x)-1)
+```
+"""
+function newton(f::Function, df::Function, x0::Float64=1.0, tol::Float64=1e-7)
     err = 1.0
     it = 0
     xp = x0
@@ -12,7 +30,25 @@ function newton(f::Function, df::Function, x0=1, tol=1e-7)
     return xp, it
 end
 
-function secant(f::Function, x0=1, x1 = 1, tol=1e-14)
+"""
+    secant(f)
+    secant(f, x0, x1)
+    secant(f, x0, x1, tol)
+
+Find roots of the noninear function `f` using secant method.
+
+# Argument
+- `f::Function`: the nonlinear function.
+- `x0::Float64`: the first initial guess.
+- `x1::Float64`: the second initial guess.
+- `tol::Float64`: error tolerance.
+
+# Example
+```julia-repl
+julia> secant(x->cos(x)-x)
+```
+"""
+function secant(f::Function, x0=1, x1 = 2, tol=1e-14)
     err = 1.0
     it = 0
     xp1 = x1
@@ -27,7 +63,26 @@ function secant(f::Function, x0=1, x1 = 1, tol=1e-14)
     return xp1, it
 end
 
-function bisect(f::Function, a::Number, b::Number, tol=1e-7, maxIt=100)
+"""
+    bisect(f, a, b)
+    bisect(f, a, b, tol)
+    bisect(f, a, b, tol, maxit)
+
+Find roots of the noninear function `f` using bisection.
+
+# Argument
+- `f::Function`: the nonlinear function.
+- `a::Float64`: the lower bound of the interval.
+- `b::Float64`: the upper bound of the interval.
+- `tol::Float64`: error tolerance.
+- `maxit::Int64`: maximum number of iteration.
+
+# Example
+```julia-repl
+julia> bisection(x->cos(x)-x, 0, pi)
+```
+"""
+function bisect(f::Function, a::Number, b::Number, tol=1e-7, maxit=100)
     if b < a
         error("the input of interval is not correct")
     end
@@ -35,7 +90,7 @@ function bisect(f::Function, a::Number, b::Number, tol=1e-7, maxIt=100)
         error("You must give an input with difference sign")
     end
     it = 0
-    while (b-a)>tol && it < maxIt
+    while (b-a)>tol && it < maxit
         c = (a+b)/2
         if f(c) == 0 
             return c
@@ -49,6 +104,24 @@ function bisect(f::Function, a::Number, b::Number, tol=1e-7, maxIt=100)
     return (a+b)/2, it
 end
 
+"""
+    fixedpoint(g, x0)
+    fixedpoint(g, x0, tol)
+    fixedpoint(g, x0, tol, maxit)
+
+Find roots of the noninear function `x=g(x)` using fixed point iteration.
+
+# Argument
+- `g::Function`: the fixed point function.
+- `x0::Float64`: the initial guess.
+- `tol::Float64`: error tolerance.
+- `maxit::Int64`: maximum number of iteration.
+
+# Example
+```julia-repl
+julia> fixedpoint(x->cos(x)-x, 0, pi)
+```
+"""
 function fixedpoint(g::Function, x0, tol=1e-15, maxIt=50)
     it = 0
     x1 = x0 + 1
@@ -60,14 +133,24 @@ function fixedpoint(g::Function, x0, tol=1e-15, maxIt=50)
     return x0, it
 end
 
+"""
+    cobweb(g, a, b, x0, N)
+
+Generate the cobweb plot associated with the orbits x_n+1=g(x_n).
+
+# Argument
+- `g::Function`: the fixed point function.
+- `a::Float64`: the lower bound of the interval.
+- `b::Float64`: the upper bound of the interval.
+- `x0::Float64`: the initial guess.
+- `N::Int64`: the number of iteration.
+
+# Example
+```julia-repl
+julia> cobweb(x->cos(x), 0, pi, 1, 30)
+```
+"""
 function cobweb(g::Function,a,b,x0,N)
-    # generate the cobweb plot associated with
-    # the orbits x_n+1=g(x_n).
-    # N is the number of iterates, and
-    # (a,b) is the interval
-    # x0 is the initial point.
-    # use @f to pass function ...
-    
     #generate N linearly space values on (a,b)
     x = collect(range(a, b, length=N+1))
     y = g.(x);
@@ -83,14 +166,25 @@ function cobweb(g::Function,a,b,x0,N)
     return anim
 end
 
+"""
+    viznewton(f, df, a, b, x0, N)
+
+Visualize the Newton's method for the nonlinear equation f(x)=0.
+
+# Argument
+- `f::Function`: the nonlinear function.
+- `df::function`: the derivative of the nonlinear function.
+- `a::Float64`: the lower bound of the interval.
+- `b::Float64`: the upper bound of the interval.
+- `x0::Float64`: the initial guess.
+- `N::Int64`: the number of iteration.
+
+# Example
+```julia-repl
+julia> cobweb(x->cos(x), 0, pi, 1, 30)
+```
+"""
 function viznewton(f::Function, df::Function, a,b,x0,N)
-    # visualize Newton's method
-    # the orbits x_n+1=g(x_n).
-    # N is the number of iterates, and
-    # (a,b) is the interval
-    # x0 is the initial point.
-    # use @f to pass function ...
-    
     #generate N linearly space values on (a,b)
     x = collect(range(a, b, length=N+1))
     y = f.(x);
@@ -104,4 +198,66 @@ function viznewton(f::Function, df::Function, a,b,x0,N)
         plot!([x[i]; x[i+1]], [f(x[i]), 0], linecolor=:red,legend = false)
     end
     return anim
+end
+
+
+"""
+    brent(f, a, b, tol, maxit)
+
+Find roots of the noninear function `f` using Brent algorithm
+
+# Argument
+- `f::Function`: the nonlinear function.
+- `a::Float64`: the lower bound of the interval.
+- `b::Float64`: the upper bound of the interval.
+- `tol::Float64`: error tolerance.
+- `maxit::Int64`: maximum number of iteration.
+
+# Example
+```julia-repl
+julia> brent(x->cos(x)-x, 0, pi)
+```
+"""
+function brent(f::Function, a::Float64, b::Float64, tol::Float64=1e-13)
+    if f(a)*f(b) >= 0.0
+        error("Error: the root is not bracket")
+    end
+    if abs(f(a)) < abs(f(b))
+        a, b = b, a
+    end
+    c = a
+    d = c
+    mflag = 1
+    while abs(f(b)) > tol || abs(b-a) > tol
+        if ~isapprox(f(a), f(c)) && ~isapprox(f(b), f(c))
+            # inverse quadratic interpolation
+            s = a*f(b)*f(c)/(f(a)-f(b))/(f(a)-f(c)) -
+                b*f(a)*f(c)/(f(b)-f(a))/(f(b)-f(c)) -
+                c*f(a)*f(b)/(f(c)-f(a))/(f(c)-f(b))
+        else
+            # secan method
+            s = b - f(b)*(b-a)/(f(b)-f(a))
+        end
+        if (s > max((3a+b)/4, b) || s < min((3a+b)/4, b)) ||
+            ( mflag == 1 && abs(s-b) >= abs(b-c)/2.0) ||
+            ( mflag == 0 && abs(s-b) >= abs(c-d)/2.0) ||
+            ( mflag == 1 && abs(b-c) < tol) ||
+            ( mflag == 0 && abs(c-d) < tol) 
+            s = (a+b)/2
+            mflag = 1
+        else
+            mflag = 0
+        end
+        d = c
+        c = b
+        if f(a)*f(s) < 0 
+            b = s
+        else 
+            a = s
+        end
+        if abs(f(a)) < abs(f(b))
+            a, b = b, a
+        end
+    end
+    return b
 end

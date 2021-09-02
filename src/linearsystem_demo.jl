@@ -40,11 +40,19 @@ println((e1,e2))
 #L*U - B[p, :]
 
 # Test Cholesky factorization
-A = rand(2000,2000)
+A = rand(20,20)
 C = A'*A
 D = deepcopy(C)
 @time L = chol(C)
-@time L = chol2!(D)
 #@benchmark L = chol3!(D)
 
 #@benchmark L2 = cholesky(C)
+
+# test gaussian elimination with partial pivot
+n = 1000
+A = rand(n,n)
+x = rand(n)
+b = A*x
+@time xt = gepp!(A,b)
+err = norm(xt-x)
+print(err)

@@ -100,3 +100,10 @@ function trustregiontest(f, xc, xt, fc, jac, gc, nu, nu0, rc)
     end
     return z, nu, it
 end
+
+function gd(f, ∇f, x0, α, γ, tol=1e-6, maxit=100)
+    df = ∇f(x0)
+    it = 0
+    while norm(df) > tol && it < maxit
+    end
+end
